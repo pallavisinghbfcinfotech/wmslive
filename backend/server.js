@@ -235,6 +235,7 @@ var db;
 
 
 app.post("/api/portfolio_api", function (req, res) {
+	console.log("detail",req.body);
  try { 
  if(req.body.rta === "KARVY"){
  const pipeline1 = [  //trans_karvy   
