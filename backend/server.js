@@ -396,6 +396,8 @@ try {var dataarray=[];
 		 });
 			}
 	 }
+     console.log("array=",dataarray)
+     res.json(dataarray);
        } catch (err) {
                 console.log(err)
             }   
