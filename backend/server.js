@@ -238,7 +238,8 @@ app.post("/api/portfolio_api", function (req, res) {
  try {
 	 var data = [];
 	 data = req.body.data;
-	 console.log("detail=",data.length);
+	 console.log("detail=",data);
+	 for(var i=0;i<data.length;i++){
  if(req.body.rta === "KARVY"){
  const pipeline1 = [  //trans_karvy   
                 { $match: { FUNDDESC: req.body.scheme, PAN1: req.body.pan, TD_ACNO: req.body.folio, INVNAME: { $regex: `^${req.body.name}.*`, $options: 'i' } } },
@@ -394,6 +395,7 @@ app.post("/api/portfolio_api", function (req, res) {
 		 //   return datacon;
 		 });
 			}
+	 }
        } catch (err) {
                 console.log(err)
             }   
