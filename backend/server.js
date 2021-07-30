@@ -235,14 +235,10 @@ var db;
 
 
 app.post("/api/portfolio_api", function (req, res) {
-try {var dataarray=[];
-	 var data = [];
-	 data = req.body.data;
-	 console.log("detail=",data.length);
-	 for(var i=0;i<data.length;i++){
- if(data[i].RTA === "KARVY"){
+ try { 
+ if(req.body.rta === "KARVY"){
  const pipeline1 = [  //trans_karvy   
-                { $match: { FUNDDESC: data[i].SCHEME, PAN1: data[i].PAN, TD_ACNO: data[i].FOLIO, INVNAME: { $regex: `^${data[i].NAME}.*`, $options: 'i' } } },
+                { $match: { FUNDDESC: req.body.scheme, PAN1: req.body.pan, TD_ACNO: req.body.folio, INVNAME: { $regex: `^${req.body.name}.*`, $options: 'i' } } },
                 { $group: { _id: { TD_ACNO: "$TD_ACNO", FUNDDESC: "$FUNDDESC", TD_NAV: "$TD_NAV", TD_TRTYPE: "$TD_TRTYPE", NAVDATE: "$NAVDATE", SCHEMEISIN: "$SCHEMEISIN" }, TD_UNITS: { $sum: "$TD_UNITS" }, TD_AMT: { $sum: "$TD_AMT" } } },
                 { $lookup: { from: 'cams_nav', localField: '_id.SCHEMEISIN', foreignField: 'ISINDivPayoutISINGrowth', as: 'nav' } },
                 { $unwind: "$nav" },
@@ -278,10 +274,8 @@ try {var dataarray=[];
                                                 if (datacon[i]['NATURE'] === "ADDPUR" || datacon[i]['NATURE'] === "Additional Purchase" || datacon[i]['NATURE'] === "NEW" || datacon[i]['NATURE'] === "ADD") {
                                                     datacon[i]['NATURE'] = "Purchase";
                                                 }
-			
 												}
-										dataarray.push(datacon);		
-			
+			 res.json(datacon);
 		 });
  }else if(req.body.rta === "CAMS"){
           const pipeline2 = [  //trans_cams
@@ -350,7 +344,6 @@ try {var dataarray=[];
                                                 }
 												}
 			 res.json(datacon);
-		  //  return datacon;
 		 });
           }else{
            const pipeline3 = [  //trans_franklin  
@@ -392,12 +385,9 @@ try {var dataarray=[];
                                                 }
 												}
 			 res.json(datacon);
-		 //   return datacon;
 		 });
 			}
-	 }
-     console.log("array=",dataarray)
-     res.json(dataarray);
+	 
        } catch (err) {
                 console.log(err)
             }   
