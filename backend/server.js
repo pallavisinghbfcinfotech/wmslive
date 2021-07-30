@@ -8,15 +8,9 @@ import nodemailer from 'nodemailer';
 import localStorage from 'localStorage'
 import Axios from 'axios'
 import moment from 'moment';
-import MongoData from 'mongodb';
-
 var Schema = mongoose.Schema;
-// dotenv.config();
-var MongoClient = MongoData.MongoClient;
- const mongodbUrl= config.MONGODB_URL;
-mongoose.Promise = global.Promise;
 
-var url = "mongodb+srv://developer:developer@cluster0.jxhzj.mongodb.net/wms?authSource=admin&replicaSet=atlas-ded6sd-shard-0&w=majority&readPreference=primary&appname=MongoDB%20Compass&retryWrites=true&ssl=true";
+ const mongodbUrl= config.MONGODB_URL;
 
 const options = {
     useMongoClient: true,
@@ -251,7 +245,9 @@ var db;
 
 
 app.post("/api/portfolio_api", function (req, res) {
+	console.log("request detail=",req.body.rta,req.body.scheme,req.body.pan,req.body.folio,req.body.name
  try {
+	 
  if(req.body.rta === "KARVY"){
  const pipeline1 = [  //trans_karvy   
                 { $match: { FUNDDESC: req.body.scheme, PAN1: req.body.pan, TD_ACNO: req.body.folio, INVNAME: { $regex: `^${req.body.name}.*`, $options: 'i' } } },
@@ -262,6 +258,7 @@ app.post("/api/portfolio_api", function (req, res) {
                 { $sort: { TD_TRDT: -1 } }
             ]
 		 transk.aggregate(pipeline1, (err, karvy) => {
+			 res.json(karvy);
 		    return karvy;
 		 });
  }else if(req.body.rta === "CAMS"){
@@ -301,6 +298,7 @@ app.post("/api/portfolio_api", function (req, res) {
                 { $sort: { TD_TRDT: -1 } }
             ]
 			 transc.aggregate(pipeline2, (err, cams) => {
+				 res.json(cams);
 		 		return cams;
 		     });
           }else{
@@ -313,6 +311,7 @@ app.post("/api/portfolio_api", function (req, res) {
                 { $sort: { TD_TRDT: -1 } }
             ]
 			 transf.aggregate(pipeline3, (err, franklin) => {
+				 res.json(franklin);
 					return franklin;
 				 });
 			}
