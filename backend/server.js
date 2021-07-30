@@ -277,8 +277,8 @@ app.post("/api/portfolio_api", function (req, res) {
                                                 }
 			
 												}
-			 //res.json(datacon);
-		    return datacon;
+			 res.json(datacon);
+		   // return datacon;
 		 });
  }else if(req.body.rta === "CAMS"){
           const pipeline2 = [  //trans_cams
