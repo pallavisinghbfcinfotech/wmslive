@@ -235,7 +235,7 @@ var db;
 
 
 app.post("/api/portfolio_api", function (req, res) {
-	console.log("request detail=",req.body.rta,req.body.scheme,req.body.pan,req.body.folio,req.body.name);
+	console.log("request detail=",req);
  try {
  if(req.body.rta === "KARVY"){
  const pipeline1 = [  //trans_karvy   
