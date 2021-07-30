@@ -235,8 +235,8 @@ var db;
 
 
 app.post("/api/portfolio_api", function (req, res) {
+	console.log("request detail=",req.body.rta,req.body.scheme,req.body.pan,req.body.folio,req.body.name);
  try {
-	 
  if(req.body.rta === "KARVY"){
  const pipeline1 = [  //trans_karvy   
                 { $match: { FUNDDESC: req.body.scheme, PAN1: req.body.pan, TD_ACNO: req.body.folio, INVNAME: { $regex: `^${req.body.name}.*`, $options: 'i' } } },
@@ -275,8 +275,9 @@ app.post("/api/portfolio_api", function (req, res) {
                                                 if (datacon[i]['NATURE'] === "ADDPUR" || datacon[i]['NATURE'] === "Additional Purchase" || datacon[i]['NATURE'] === "NEW" || datacon[i]['NATURE'] === "ADD") {
                                                     datacon[i]['NATURE'] = "Purchase";
                                                 }
+			
 												}
-			 res.json(datacon);
+			 //res.json(datacon);
 		    return datacon;
 		 });
  }else if(req.body.rta === "CAMS"){
