@@ -306,7 +306,7 @@ app.post("/api/portfolio_api", function (req, res) {
             ]
 			trans= transf;
 			}
-	 trans.aggregate(pipeline, (err, response) => {
+	 trans.aggregate(pipeline1, (err, response) => {
 		 var dataarr = response;
 		 for (var i = 0; i < dataarr.length; i++) {
                                                 if (dataarr[i]['NATURE'] === "Redemption" || dataarr[i]['NATURE'] === "RED" ||
