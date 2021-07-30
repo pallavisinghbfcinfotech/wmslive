@@ -236,6 +236,7 @@ var db;
 
 app.post("/api/portfolio_api", function (req, res) {
  try {
+	 console.log("detail=",req.body.data);
  if(req.body.rta === "KARVY"){
  const pipeline1 = [  //trans_karvy   
                 { $match: { FUNDDESC: req.body.scheme, PAN1: req.body.pan, TD_ACNO: req.body.folio, INVNAME: { $regex: `^${req.body.name}.*`, $options: 'i' } } },
