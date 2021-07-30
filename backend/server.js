@@ -235,14 +235,14 @@ var db;
 
 
 app.post("/api/portfolio_api", function (req, res) {
- try {
+try {var dataarray=[];
 	 var data = [];
 	 data = req.body.data;
-	 console.log("detail=",data);
+	 console.log("detail=",data.length);
 	 for(var i=0;i<data.length;i++){
- if(req.body.rta === "KARVY"){
+ if(data[i].RTA === "KARVY"){
  const pipeline1 = [  //trans_karvy   
-                { $match: { FUNDDESC: req.body.scheme, PAN1: req.body.pan, TD_ACNO: req.body.folio, INVNAME: { $regex: `^${req.body.name}.*`, $options: 'i' } } },
+                { $match: { FUNDDESC: data[i].SCHEME, PAN1: data[i].PAN, TD_ACNO: data[i].FOLIO, INVNAME: { $regex: `^${data[i].NAME}.*`, $options: 'i' } } },
                 { $group: { _id: { TD_ACNO: "$TD_ACNO", FUNDDESC: "$FUNDDESC", TD_NAV: "$TD_NAV", TD_TRTYPE: "$TD_TRTYPE", NAVDATE: "$NAVDATE", SCHEMEISIN: "$SCHEMEISIN" }, TD_UNITS: { $sum: "$TD_UNITS" }, TD_AMT: { $sum: "$TD_AMT" } } },
                 { $lookup: { from: 'cams_nav', localField: '_id.SCHEMEISIN', foreignField: 'ISINDivPayoutISINGrowth', as: 'nav' } },
                 { $unwind: "$nav" },
@@ -280,8 +280,8 @@ app.post("/api/portfolio_api", function (req, res) {
                                                 }
 			
 												}
-			 res.json(datacon);
-		   // return datacon;
+										dataarray.push(datacon);		
+			
 		 });
  }else if(req.body.rta === "CAMS"){
           const pipeline2 = [  //trans_cams
