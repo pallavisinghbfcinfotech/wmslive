@@ -235,7 +235,6 @@ var db;
 
 
 app.post("/api/portfolio_api", function (req, res) {
-	console.log("request detail=",req);
  try {
  if(req.body.rta === "KARVY"){
  const pipeline1 = [  //trans_karvy   
@@ -347,7 +346,7 @@ app.post("/api/portfolio_api", function (req, res) {
                                                 }
 												}
 			 res.json(datacon);
-		    return datacon;
+		  //  return datacon;
 		 });
           }else{
            const pipeline3 = [  //trans_franklin  
@@ -389,7 +388,7 @@ app.post("/api/portfolio_api", function (req, res) {
                                                 }
 												}
 			 res.json(datacon);
-		    return datacon;
+		 //   return datacon;
 		 });
 			}
        } catch (err) {
