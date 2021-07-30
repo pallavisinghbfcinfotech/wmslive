@@ -245,7 +245,7 @@ var db;
 
 
 app.post("/api/portfolio_api", function (req, res) {
-	console.log("request detail=",req.body.rta,req.body.scheme,req.body.pan,req.body.folio,req.body.name);
+	var trans="";
  try {
 	 
  if(req.body.rta === "KARVY"){
@@ -257,12 +257,9 @@ app.post("/api/portfolio_api", function (req, res) {
                 { $project: { _id: 0, FOLIO: "$_id.TD_ACNO", SCHEME: "$_id.FUNDDESC", TD_NAV: "$_id.TD_NAV", NATURE: "$_id.TD_TRTYPE", TD_TRDT: { $dateToString: { format: "%d-%m-%Y", date: "$_id.NAVDATE" } }, ISIN: "$_id.SCHEMEISIN", cnav: "$nav.NetAssetValue", navdate: "$nav.Date", UNITS: { $sum: "$TD_UNITS" }, AMOUNT: { $sum: "$TD_AMT" } } },
                 { $sort: { TD_TRDT: -1 } }
             ]
-		 transk.aggregate(pipeline1, (err, karvy) => {
-			 res.json(karvy);
-		    return karvy;
-		 });
+ 	trans = transk;
  }else if(req.body.rta === "CAMS"){
-          const pipeline2 = [  //trans_cams
+          const pipeline1 = [  //trans_cams
                 { $match: { SCHEME: req.body.scheme, PAN: req.body.pan, FOLIO_NO: req.body.folio, INV_NAME: { $regex: `^${req.body.name}.*`, $options: 'i' } } },
                 { $group: { _id: { FOLIO_NO: "$FOLIO_NO", SCHEME: "$SCHEME", PURPRICE: "$PURPRICE", TRXN_TYPE_: "$TRXN_TYPE_", TRADDATE: "$TRADDATE", AMC_CODE: "$AMC_CODE", PRODCODE: "$PRODCODE", code: { $substr: ["$PRODCODE", { $strLenCP: "$AMC_CODE" }, -1] } }, UNITS: { $sum: "$UNITS" }, AMOUNT: { $sum: "$AMOUNT" } } },
                 {
@@ -297,12 +294,9 @@ app.post("/api/portfolio_api", function (req, res) {
                 { $project: { _id: 0, FOLIO: "$_id.FOLIO_NO", SCHEME: "$_id.SCHEME", TD_NAV: "$_id.PURPRICE", NATURE: "$_id.TRXN_TYPE_", TD_TRDT: { $dateToString: { format: "%m/%d/%Y", date: "$_id.TRADDATE" } }, ISIN: "$products.ISIN", cnav: "$nav.NetAssetValue", navdate: "$nav.Date", UNITS: { $sum: "$UNITS" }, AMOUNT: { $sum: "$AMOUNT" } } },
                 { $sort: { TD_TRDT: -1 } }
             ]
-			 transc.aggregate(pipeline2, (err, cams) => {
-				 res.json(cams);
-		 		return cams;
-		     });
+			trans = transc;
           }else{
-           const pipeline3 = [  //trans_franklin  
+           const pipeline1 = [  //trans_franklin  
                 { $match: { SCHEME_NA1: req.body.scheme, IT_PAN_NO1: req.body.pan, FOLIO_NO: req.body.folio, INVESTOR_2: { $regex: `^${req.body.name}.*`, $options: 'i' } } },
                 { $group: { _id: { FOLIO_NO: "$FOLIO_NO", SCHEME_NA1: "$SCHEME_NA1", NAV: "$NAV", TRXN_TYPE: "$TRXN_TYPE", TRXN_DATE: "$TRXN_DATE", ISIN: "$ISIN" }, UNITS: { $sum: "$UNITS" }, AMOUNT: { $sum: "$AMOUNT" } } },
                 { $lookup: { from: 'cams_nav', localField: '_id.ISIN', foreignField: 'ISINDivPayoutISINGrowth', as: 'nav' } },
@@ -310,11 +304,45 @@ app.post("/api/portfolio_api", function (req, res) {
                 { $project: { _id: 0, FOLIO: "$_id.FOLIO_NO", SCHEME: "$_id.SCHEME_NA1", TD_NAV: "$_id.NAV", NATURE: "$_id.TRXN_TYPE", TD_TRDT: { $dateToString: { format: "%d-%m-%Y", date: "$_id.TRXN_DATE" } }, ISIN: "$_id.ISIN", cnav: "$nav.NetAssetValue", navdate: "$nav.Date", UNITS: { $sum: "$UNITS" }, AMOUNT: { $sum: "$AMOUNT" } } },
                 { $sort: { TD_TRDT: -1 } }
             ]
-			 transf.aggregate(pipeline3, (err, franklin) => {
-				 res.json(franklin);
-					return franklin;
-				 });
+			trans= transf;
 			}
+	 trans.aggregate(pipeline, (err, response) => {
+		 var dataarr = response;
+		 for (var i = 0; i < dataarr.length; i++) {
+                                                if (dataarr[i]['NATURE'] === "Redemption" || dataarr[i]['NATURE'] === "RED" ||
+                                                    dataarr[i]['NATURE'] === "SIPR" || dataarr[i]['NATURE'] === "Full Redemption" ||
+                                                    dataarr[i]['NATURE'] === "Partial Redemption" || dataarr[i]['NATURE'] === "Lateral Shift Out" ||
+                                                    dataarr[i]['NATURE'] === "Switchout" || dataarr[i]['NATURE'] === "Transfer-Out" ||
+                                                    dataarr[i]['NATURE'] === "Transmission Out" || dataarr[i]['NATURE'] === "Switch Over Out" ||
+                                                    dataarr[i]['NATURE'] === "LTOP" || dataarr[i]['NATURE'] === "LTOF" || dataarr[i]['NATURE'] === "FULR" ||
+                                                    dataarr[i]['NATURE'] === "Partial Switch Out" || dataarr[i]['NATURE'] === "Full Switch Out" ||
+                                                    dataarr[i]['NATURE'] === "IPOR" || dataarr[i]['NATURE'] === "FUL" ||
+                                                    dataarr[i]['NATURE'] === "STPO" || dataarr[i]['NATURE'] === "SWOF" ||
+                                                    dataarr[i]['NATURE'] === "SWD") {
+                                                    dataarr[i]['NATURE'] = "Switch Out";
+                                                }
+                                                if (dataarr[i]['NATURE'].match(/Systematic Investment.*/) ||
+                                                    dataarr[i]['NATURE'] === "SIN" ||
+                                                    dataarr[i]['NATURE'].match(/Systematic - Instalment.*/) ||
+                                                    dataarr[i]['NATURE'].match(/Systematic - To.*/) ||
+                                                    dataarr[i]['NATURE'].match(/Systematic-NSE.*/) ||
+                                                    dataarr[i]['NATURE'].match(/Systematic Physical.*/) ||
+                                                    dataarr[i]['NATURE'].match(/Systematic.*/) ||
+                                                    dataarr[i]['NATURE'].match(/Systematic-Normal.*/) ||
+                                                    dataarr[i]['NATURE'].match(/Systematic (ECS).*/)) {
+                                                    dataarr[i]['NATURE'] = "SIP";
+                                                }
+                                                if (dataarr[i]['NATURE'] === "ADDPUR" || dataarr[i]['NATURE'] === "Additional Purchase" || dataarr[i]['NATURE'] === "NEW" || dataarr[i]['NATURE'] === "ADD") {
+                                                    dataarr[i]['NATURE'] = "Purchase";
+                                                }
+                                                if (dataarr[i]['NATURE'] === "Switch In" || dataarr[i]['NATURE'] === "LTIA" ||
+                                                    dataarr[i]['NATURE'] === "LTIN") {
+                                                    dataarr[i]['NATURE'] = "Switch In";
+                                                }
+                                            }
+				 res.json(dataarr);
+					return dataarr;
+				 });
        } catch (err) {
                 console.log(err)
             }   
