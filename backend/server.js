@@ -253,6 +253,7 @@ app.post("/api/portfolio_api", function (req, res) {
     { $unwind: "$nav" },
     { $project: { _id: 0, FOLIO: "$_id.TD_ACNO", SCHEME: "$_id.FUNDDESC", TD_NAV: "$_id.TD_NAV", NATURE: "$_id.TD_TRTYPE", TD_TRDT: { $dateToString: { format: "%d-%m-%Y", date: "$_id.NAVDATE" } }, ISIN: "$_id.SCHEMEISIN", cnav: "$nav.NetAssetValue", navdate: "$nav.Date", UNITS: "$_id.TD_UNITS" , AMOUNT: "$_id.TD_AMT" }  },
     { $sort: { TD_TRDT: -1 } }
+	  ]
 		 transk.aggregate(pipeline1, (err, karvy) => {
 		 var datacon = karvy;
 		 for (var i = 0; i < datacon.length; i++) {
