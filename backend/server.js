@@ -287,41 +287,76 @@ app.post("/api/portfolio_api", function (req, res) {
 			 res.json(datacon);
 		 });
  }else if(req.body.rta === "CAMS"){
-          const pipeline2 = [  //trans_cams
-                { $match: { SCHEME: req.body.scheme, PAN: req.body.pan, FOLIO_NO: req.body.folio, INV_NAME: { $regex: `^${req.body.name}.*`, $options: 'i' } } },
-                { $group: { _id: { FOLIO_NO: "$FOLIO_NO", SCHEME: "$SCHEME", PURPRICE: "$PURPRICE", TRXN_TYPE_: "$TRXN_TYPE_", TRADDATE: "$TRADDATE", AMC_CODE: "$AMC_CODE", PRODCODE: "$PRODCODE", code: { $substr: ["$PRODCODE", { $strLenCP: "$AMC_CODE" }, -1] } }, UNITS: { $sum: "$UNITS" }, AMOUNT: { $sum: "$AMOUNT" } } },
+//           const pipeline2 = [  //trans_cams
+//                 { $match: { SCHEME: req.body.scheme, PAN: req.body.pan, FOLIO_NO: req.body.folio, INV_NAME: { $regex: `^${req.body.name}.*`, $options: 'i' } } },
+//                 { $group: { _id: { FOLIO_NO: "$FOLIO_NO", SCHEME: "$SCHEME", PURPRICE: "$PURPRICE", TRXN_TYPE_: "$TRXN_TYPE_", TRADDATE: "$TRADDATE", AMC_CODE: "$AMC_CODE", PRODCODE: "$PRODCODE", code: { $substr: ["$PRODCODE", { $strLenCP: "$AMC_CODE" }, -1] } }, UNITS: { $sum: "$UNITS" }, AMOUNT: { $sum: "$AMOUNT" } } },
+//                 {
+//                     $lookup:
+//                     {
+//                         from: "products",
+//                         let: { ccc: "$_id.code", amc: "$_id.AMC_CODE" },
+//                         pipeline: [
+//                             {
+//                                 $match:
+//                                 {
+//                                     $expr:
+//                                     {
+//                                         $and:
+//                                             [
+//                                                 { $eq: ["$PRODUCT_CODE", "$$ccc"] },
+//                                                 { $eq: ["$AMC_CODE", "$$amc"] }
+//                                             ]
+//                                     }
+//                                 }
+//                             },
+//                             { $project: { _id: 0 } }
+//                         ],
+//                         as: "products"
+//                     }
+//                 },
+
+//                 { $unwind: "$products" },
+//                 { $group: { _id: { FOLIO_NO: "$_id.FOLIO_NO", SCHEME: "$_id.SCHEME", PURPRICE: "$_id.PURPRICE", TRXN_TYPE_: "$_id.TRXN_TYPE_", TRADDATE: "$_id.TRADDATE", ISIN: "$products.ISIN" }, UNITS: { $sum: "$UNITS" }, AMOUNT: { $sum: "$AMOUNT" } } },
+//                 { $lookup: { from: 'cams_nav', localField: '_id.ISIN', foreignField: 'ISINDivPayoutISINGrowth', as: 'nav' } },
+//                 { $unwind: "$nav" },
+//                 { $project: { _id: 0, FOLIO: "$_id.FOLIO_NO", SCHEME: "$_id.SCHEME", TD_NAV: "$_id.PURPRICE", NATURE: "$_id.TRXN_TYPE_", TD_TRDT: { $dateToString: { format: "%m/%d/%Y", date: "$_id.TRADDATE" } }, ISIN: "$products.ISIN", cnav: "$nav.NetAssetValue", navdate: "$nav.Date", UNITS: { $sum: "$UNITS" }, AMOUNT: { $sum: "$AMOUNT" } } },
+//                 { $sort: { TD_TRDT: -1 } }
+//             ]
+	 const pipeline2 = [  //trans_cams
+    { $match: { SCHEME: req.body.scheme, PAN: req.body.pan, FOLIO_NO: req.body.folio, INV_NAME: { $regex: `^${req.body.name}.*`, $options: 'i' } } },
+    { $group: { _id: { FOLIO_NO: "$FOLIO_NO", SCHEME: "$SCHEME", PURPRICE: "$PURPRICE", TRXN_TYPE_: "$TRXN_TYPE_", TRADDATE: "$TRADDATE", AMC_CODE: "$AMC_CODE", PRODCODE: "$PRODCODE", code: { $substr: ["$PRODCODE", { $strLenCP: "$AMC_CODE" }, -1] } , UNITS: "$UNITS" , AMOUNT:  "$AMOUNT" }  } },
+    {
+        $lookup:
+        {
+            from: "products",
+            let: { ccc: "$_id.code", amc: "$_id.AMC_CODE" },
+            pipeline: [
                 {
-                    $lookup:
+                    $match:
                     {
-                        from: "products",
-                        let: { ccc: "$_id.code", amc: "$_id.AMC_CODE" },
-                        pipeline: [
-                            {
-                                $match:
-                                {
-                                    $expr:
-                                    {
-                                        $and:
-                                            [
-                                                { $eq: ["$PRODUCT_CODE", "$$ccc"] },
-                                                { $eq: ["$AMC_CODE", "$$amc"] }
-                                            ]
-                                    }
-                                }
-                            },
-                            { $project: { _id: 0 } }
-                        ],
-                        as: "products"
+                        $expr:
+                        {
+                            $and:
+                                [
+                                    { $eq: ["$PRODUCT_CODE", "$$ccc"] },
+                                    { $eq: ["$AMC_CODE", "$$amc"] }
+                                ]
+                        }
                     }
                 },
+                { $project: { _id: 0 } }
+            ],
+            as: "products"
+        }
+    },
 
-                { $unwind: "$products" },
-                { $group: { _id: { FOLIO_NO: "$_id.FOLIO_NO", SCHEME: "$_id.SCHEME", PURPRICE: "$_id.PURPRICE", TRXN_TYPE_: "$_id.TRXN_TYPE_", TRADDATE: "$_id.TRADDATE", ISIN: "$products.ISIN" }, UNITS: { $sum: "$UNITS" }, AMOUNT: { $sum: "$AMOUNT" } } },
-                { $lookup: { from: 'cams_nav', localField: '_id.ISIN', foreignField: 'ISINDivPayoutISINGrowth', as: 'nav' } },
-                { $unwind: "$nav" },
-                { $project: { _id: 0, FOLIO: "$_id.FOLIO_NO", SCHEME: "$_id.SCHEME", TD_NAV: "$_id.PURPRICE", NATURE: "$_id.TRXN_TYPE_", TD_TRDT: { $dateToString: { format: "%m/%d/%Y", date: "$_id.TRADDATE" } }, ISIN: "$products.ISIN", cnav: "$nav.NetAssetValue", navdate: "$nav.Date", UNITS: { $sum: "$UNITS" }, AMOUNT: { $sum: "$AMOUNT" } } },
-                { $sort: { TD_TRDT: -1 } }
-            ]
+    { $unwind: "$products" },
+    { $group: { _id: { FOLIO_NO: "$_id.FOLIO_NO", SCHEME: "$_id.SCHEME", PURPRICE: "$_id.PURPRICE", TRXN_TYPE_: "$_id.TRXN_TYPE_", TRADDATE: "$_id.TRADDATE", ISIN: "$products.ISIN" , UNITS: "$_id.UNITS", AMOUNT: "$_id.AMOUNT" } } },
+    { $lookup: { from: 'cams_nav', localField: '_id.ISIN', foreignField: 'ISINDivPayoutISINGrowth', as: 'nav' } },
+    { $unwind: "$nav" },
+    { $project: { _id: 0, FOLIO: "$_id.FOLIO_NO", SCHEME: "$_id.SCHEME", TD_NAV: "$_id.PURPRICE", NATURE: "$_id.TRXN_TYPE_", TD_TRDT: { $dateToString: { format: "%m/%d/%Y", date: "$_id.TRADDATE" } }, ISIN: "$products.ISIN", cnav: "$nav.NetAssetValue", navdate:"$nav.Date", UNITS:"$_id.UNITS",AMOUNT: "$_id.AMOUNT"  } },
+    { $sort: { TD_TRDT: -1 } }
+]
 			 transc.aggregate(pipeline2, (err, cams) => {
 				 var datacon = cams;
 		 for (var i = 0; i < datacon.length; i++) {
@@ -355,14 +390,22 @@ app.post("/api/portfolio_api", function (req, res) {
 			 res.json(datacon);
 		 });
           }else{
-           const pipeline3 = [  //trans_franklin  
-                { $match: { SCHEME_NA1: req.body.scheme, IT_PAN_NO1: req.body.pan, FOLIO_NO: req.body.folio, INVESTOR_2: { $regex: `^${req.body.name}.*`, $options: 'i' } } },
-                { $group: { _id: { FOLIO_NO: "$FOLIO_NO", SCHEME_NA1: "$SCHEME_NA1", NAV: "$NAV", TRXN_TYPE: "$TRXN_TYPE", TRXN_DATE: "$TRXN_DATE", ISIN: "$ISIN" }, UNITS: { $sum: "$UNITS" }, AMOUNT: { $sum: "$AMOUNT" } } },
-                { $lookup: { from: 'cams_nav', localField: '_id.ISIN', foreignField: 'ISINDivPayoutISINGrowth', as: 'nav' } },
-                { $unwind: "$nav" },
-                { $project: { _id: 0, FOLIO: "$_id.FOLIO_NO", SCHEME: "$_id.SCHEME_NA1", TD_NAV: "$_id.NAV", NATURE: "$_id.TRXN_TYPE", TD_TRDT: { $dateToString: { format: "%d-%m-%Y", date: "$_id.TRXN_DATE" } }, ISIN: "$_id.ISIN", cnav: "$nav.NetAssetValue", navdate: "$nav.Date", UNITS: { $sum: "$UNITS" }, AMOUNT: { $sum: "$AMOUNT" } } },
-                { $sort: { TD_TRDT: -1 } }
-            ]
+//            const pipeline3 = [  //trans_franklin  
+//                 { $match: { SCHEME_NA1: req.body.scheme, IT_PAN_NO1: req.body.pan, FOLIO_NO: req.body.folio, INVESTOR_2: { $regex: `^${req.body.name}.*`, $options: 'i' } } },
+//                 { $group: { _id: { FOLIO_NO: "$FOLIO_NO", SCHEME_NA1: "$SCHEME_NA1", NAV: "$NAV", TRXN_TYPE: "$TRXN_TYPE", TRXN_DATE: "$TRXN_DATE", ISIN: "$ISIN" }, UNITS: { $sum: "$UNITS" }, AMOUNT: { $sum: "$AMOUNT" } } },
+//                 { $lookup: { from: 'cams_nav', localField: '_id.ISIN', foreignField: 'ISINDivPayoutISINGrowth', as: 'nav' } },
+//                 { $unwind: "$nav" },
+//                 { $project: { _id: 0, FOLIO: "$_id.FOLIO_NO", SCHEME: "$_id.SCHEME_NA1", TD_NAV: "$_id.NAV", NATURE: "$_id.TRXN_TYPE", TD_TRDT: { $dateToString: { format: "%d-%m-%Y", date: "$_id.TRXN_DATE" } }, ISIN: "$_id.ISIN", cnav: "$nav.NetAssetValue", navdate: "$nav.Date", UNITS: { $sum: "$UNITS" }, AMOUNT: { $sum: "$AMOUNT" } } },
+//                 { $sort: { TD_TRDT: -1 } }
+//             ]
+  const pipeline3 = [  //trans_franklin  
+    { $match: { SCHEME_NA1: req.body.scheme, IT_PAN_NO1: req.body.pan, FOLIO_NO: req.body.folio, INVESTOR_2: { $regex: `^${req.body.name}.*`, $options: 'i' } } },
+    { $group: { _id: { FOLIO_NO: "$FOLIO_NO", SCHEME_NA1: "$SCHEME_NA1", NAV: "$NAV", TRXN_TYPE: "$TRXN_TYPE", TRXN_DATE: "$TRXN_DATE", ISIN: "$ISIN" , UNITS: "$UNITS" , AMOUNT: "$AMOUNT" } } },
+    { $lookup: { from: 'cams_nav', localField: '_id.ISIN', foreignField: 'ISINDivPayoutISINGrowth', as: 'nav' } },
+    { $unwind: "$nav" },
+    { $project: { _id: 0, FOLIO: "$_id.FOLIO_NO", SCHEME: "$_id.SCHEME_NA1", TD_NAV: "$_id.NAV", NATURE: "$_id.TRXN_TYPE", TD_TRDT: { $dateToString: { format: "%d-%m-%Y", date: "$_id.TRXN_DATE" } }, ISIN: "$_id.ISIN", cnav: "$nav.NetAssetValue", navdate: "$nav.Date", UNITS: "$_id.UNITS" , AMOUNT:"$_id.AMOUNT"  } },
+    { $sort: { TD_TRDT: -1 } }
+]
 			 transf.aggregate(pipeline3, (err, franklin) => {
 				 var datacon = franklin;
 		 for (var i = 0; i < datacon.length; i++) {
