@@ -252,7 +252,7 @@ app.post("/api/portfolio_api", function (req, res) {
     { $lookup: { from: 'cams_nav', localField: '_id.SCHEMEISIN', foreignField: 'ISINDivPayoutISINGrowth', as: 'nav' } },
     { $unwind: "$nav" },
     { $project: { _id: 0, FOLIO: "$_id.TD_ACNO", SCHEME: "$_id.FUNDDESC", TD_NAV: "$_id.TD_NAV", NATURE: "$_id.TD_TRTYPE", TD_TRDT: { $dateToString: { format: "%d-%m-%Y", date: "$_id.NAVDATE" } }, ISIN: "$_id.SCHEMEISIN", cnav: "$nav.NetAssetValue", navdate: "$nav.Date", UNITS: "$_id.TD_UNITS" , AMOUNT: "$_id.TD_AMT" }  },
-    { $sort: { FOLIO: -1 } }
+    { $sort: { SCHEME: -1 } }
 	  ]
 		 transk.aggregate(pipeline1, (err, karvy) => {
 		 var datacon = karvy;
@@ -355,7 +355,7 @@ app.post("/api/portfolio_api", function (req, res) {
     { $lookup: { from: 'cams_nav', localField: '_id.ISIN', foreignField: 'ISINDivPayoutISINGrowth', as: 'nav' } },
     { $unwind: "$nav" },
     { $project: { _id: 0, FOLIO: "$_id.FOLIO_NO", SCHEME: "$_id.SCHEME", TD_NAV: "$_id.PURPRICE", NATURE: "$_id.TRXN_TYPE_", TD_TRDT: { $dateToString: { format: "%m/%d/%Y", date: "$_id.TRADDATE" } }, ISIN: "$products.ISIN", cnav: "$nav.NetAssetValue", navdate:"$nav.Date", UNITS:"$_id.UNITS",AMOUNT: "$_id.AMOUNT"  } },
-    { $sort: { FOLIO: -1 } }
+    { $sort: { SCHEME: -1 } }
 ]
 			 transc.aggregate(pipeline2, (err, cams) => {
 				 var datacon = cams;
@@ -404,7 +404,7 @@ app.post("/api/portfolio_api", function (req, res) {
     { $lookup: { from: 'cams_nav', localField: '_id.ISIN', foreignField: 'ISINDivPayoutISINGrowth', as: 'nav' } },
     { $unwind: "$nav" },
     { $project: { _id: 0, FOLIO: "$_id.FOLIO_NO", SCHEME: "$_id.SCHEME_NA1", TD_NAV: "$_id.NAV", NATURE: "$_id.TRXN_TYPE", TD_TRDT: { $dateToString: { format: "%d-%m-%Y", date: "$_id.TRXN_DATE" } }, ISIN: "$_id.ISIN", cnav: "$nav.NetAssetValue", navdate: "$nav.Date", UNITS: "$_id.UNITS" , AMOUNT:"$_id.AMOUNT"  } },
-    { $sort: { FOLIO: -1 } }
+    { $sort: { SCHEME: -1 } }
 ]
 			 transf.aggregate(pipeline3, (err, franklin) => {
 				 var datacon = franklin;
@@ -435,7 +435,7 @@ app.post("/api/portfolio_api", function (req, res) {
                                                 if (datacon[i]['NATURE'] === "ADDPUR" || datacon[i]['NATURE'] === "Additional Purchase" || datacon[i]['NATURE'] === "NEW" || datacon[i]['NATURE'] === "ADD") {
                                                     datacon[i]['NATURE'] = "Purchase";
                                                 }
-						 datacon = datacon.sort((a, b) => (a.FOLIO > b.FOLIO) ? 1 : -1);						}
+						 datacon = datacon.sort((a, b) => (a.SCHEME > b.SCHEME) ? 1 : -1);						}
 			 res.json(datacon);
 		 });
 			}
