@@ -283,7 +283,8 @@ app.post("/api/portfolio_api", function (req, res) {
                                                 if (datacon[i]['NATURE'] === "ADDPUR" || datacon[i]['NATURE'] === "Additional Purchase" || datacon[i]['NATURE'] === "NEW" || datacon[i]['NATURE'] === "ADD") {
                                                     datacon[i]['NATURE'] = "Purchase";
                                                 }
-												}
+							}
+			  datacon = datacon.sort((a, b) => (a.SCHEME > b.SCHEME) ? 1 : -1);	
 			 res.json(datacon);
 		 });
  }else if(req.body.rta === "CAMS"){
@@ -386,7 +387,8 @@ app.post("/api/portfolio_api", function (req, res) {
                                                 if (datacon[i]['NATURE'] === "ADDPUR" || datacon[i]['NATURE'] === "Additional Purchase" || datacon[i]['NATURE'] === "NEW" || datacon[i]['NATURE'] === "ADD") {
                                                     datacon[i]['NATURE'] = "Purchase";
                                                 }
-												}
+							}
+				  datacon = datacon.sort((a, b) => (a.SCHEME > b.SCHEME) ? 1 : -1);	
 			 res.json(datacon);
 		 });
           }else{
@@ -435,7 +437,8 @@ app.post("/api/portfolio_api", function (req, res) {
                                                 if (datacon[i]['NATURE'] === "ADDPUR" || datacon[i]['NATURE'] === "Additional Purchase" || datacon[i]['NATURE'] === "NEW" || datacon[i]['NATURE'] === "ADD") {
                                                     datacon[i]['NATURE'] = "Purchase";
                                                 }
-						 datacon = datacon.sort((a, b) => (a.SCHEME > b.SCHEME) ? 1 : -1);						}
+											}
+				  datacon = datacon.sort((a, b) => (a.SCHEME > b.SCHEME) ? 1 : -1);	
 			 res.json(datacon);
 		 });
 			}
