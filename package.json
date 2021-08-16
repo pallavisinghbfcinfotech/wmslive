@@ -17,6 +17,7 @@
     "localStorage": "^1.0.4",
     "nodemailer": "^6.6.0",
     "node-localstorage": "^2.1.6",
+    "connect-timeout": "^1.9.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
