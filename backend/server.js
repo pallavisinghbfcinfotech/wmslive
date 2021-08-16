@@ -8,6 +8,7 @@ import nodemailer from 'nodemailer';
 import localStorage from 'localStorage'
 import Axios from 'axios'
 import moment from 'moment';
+import timeout from 'connect-timeout';
 var Schema = mongoose.Schema;
 
  const mongodbUrl= config.MONGODB_URL;
@@ -451,7 +452,7 @@ var db;
 //             }   
 // })
 
-app.post("/api/portfolio_api", function (req, res) {
+app.post("/api/portfolio_api",timeout('5s'), bodyParser.json(), haltOnTimedout, function (req, res) {
  try { 
  if(req.body.rta === "KARVY"){
     const pipeline1 = [  //trans_karvy   
