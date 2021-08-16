@@ -452,7 +452,7 @@ var db;
 //             }   
 // })
 
-app.post("/api/portfolio_api",timeout('5s'), bodyParser.json(), haltOnTimedout, function (req, res) {
+app.post("/api/portfolio_api",timeout('5s'), bodyParser.json(),  function (req, res) {
  try { 
  if(req.body.rta === "KARVY"){
     const pipeline1 = [  //trans_karvy   
